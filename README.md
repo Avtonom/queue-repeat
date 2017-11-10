@@ -1,6 +1,11 @@
 # queue-repeat
 Queue Repeat Manager to RabbitMQ.
 
+install
+```php
+    $ composer require "avtonom/queue-repeat"
+```
+
 config
 ```php
     /** \PhpAmqpLib\Message\AMQPMessage $msg **/
