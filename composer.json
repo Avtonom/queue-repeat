@@ -1,5 +1,5 @@
 {
-    "name": "Avtonom/queue-repeat",
+    "name": "avtonom/queue-repeat",
     "type": "library",
     "homepage": "https://github.com/Avtonom/queue-repeat",
     "keywords": ["queue-repeat", "queue", "repeat", "retry", "delay", "AMQP", "amqplib", "rabbitmq"],
