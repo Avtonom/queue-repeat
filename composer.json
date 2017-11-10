@@ -2,7 +2,7 @@
     "name": "Avtonom/queue-repeat",
     "type": "library",
     "homepage": "https://github.com/Avtonom/queue-repeat",
-    "keywords": ["queue-repeat", "queue", "repeat", "repeat", "delay"],
+    "keywords": ["queue-repeat", "queue", "repeat", "retry", "delay", "AMQP", "amqplib", "rabbitmq"],
     "license": "MIT",
     "authors": [{
         "name": "Anton U",
