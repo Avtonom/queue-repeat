@@ -12,5 +12,8 @@
       "php": ">=5.3.0",
       "php-amqplib/php-amqplib": "^2.7",
       "yriveiro/php-backoff": "^1.1"
+    },
+    "autoload": {
+      "psr-4": {"QueueRepeat\\": "QueueRepeat/"}
     }
 }
