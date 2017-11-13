@@ -1,8 +1,14 @@
 # queue-repeat
 Queue Repeat Manager to RabbitMQ.
 
+Page bundle: https://github.com/Avtonom/queue-repeat
+
+if you use symfony https://github.com/Avtonom/delay-exponential-backoff-bundle
+
+Use delay Exponential expression
+
 install
-```php
+```
     $ composer require "avtonom/queue-repeat"
 ```
 
@@ -40,11 +46,15 @@ use
      * @param string $routingKey
      * @param array $data
      * @param int $retryMax
+     * @param int $cap
+     
 ```php
     $this->getQueueProvider()->setRepeatManager(new QueueRepeatManager());
     try {
-        $this->getQueueProvider()->getRepeatManager()->resendMessage($messageHeaders, $routingKey, $data, $retryMax);
+        $this->getQueueProvider()->getRepeatManager()->resendMessage($messageHeaders, $routingKey, $data, $retryMax, $cap);
     } catch (QueueRepeatException $e) {
         $this->getLogger()->warning('QueueRepeatException: '. $e->getMessage());
     }
 ```
+
+Read information https://habrahabr.ru/post/227225/

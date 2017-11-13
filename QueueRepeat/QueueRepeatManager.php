@@ -43,12 +43,13 @@ class QueueRepeatManager
      * @param string $routingKey
      * @param array $data
      * @param int $retryMax
+     * @param int $cap
      *
      * @return array
      *
      * @throws QueueRepeatException
      */
-    public function resendMessage($messageHeaders, $routingKey, $data, $retryMax)
+    public function resendMessage($messageHeaders, $routingKey, $data, $retryMax = 0, $cap = 1000000)
     {
         if($retryMax == 1){
             throw new QueueRepeatException('Attempt resendMessage must be > 1');
@@ -58,20 +59,23 @@ class QueueRepeatManager
             $propertyApplicationHeaders = $messageHeaders['application_headers'];
             if(!empty($propertyApplicationHeaders['x-death'])){
                 $attempt = count($propertyApplicationHeaders['x-death']);
-                /*if($attempt > $retryMax){
-                    throw new QueueRepeatException('Exceeded the maximum number of repeats: '.$retryMax);
-                }*/
+                if($attempt > $retryMax){
+                    throw new QueueRepeatException(sprintf("The number of max attempts (%s) was exceeded", $retryMax));
+                }
             }
         } else {
             $messageHeaders['application_headers'] = [];
         }
         try {
-            $backoff = new Backoff(['maxAttempts' => $retryMax]);
-            $delay = (int) floor($backoff->equalJitter($attempt) / 1000);
+            $delay = $attempt > 1 ? (pow(2, $attempt - 1) * $cap) : $cap;
+            $delaySec = (int) floor($delay / 1000000);
+//            $backoff = new Backoff(['maxAttempts' => $retryMax, 'cap' => $cap]);
+//            $delay = $backoff->equalJitter($attempt);
+//            $delay = (int) floor($backoff->equalJitter($attempt) / 1000);
         } catch (BackoffException $e) {
             throw new QueueRepeatException($e->getMessage(), $e->getCode(), $e);
         }
-        return $this->dispatch($messageHeaders, $routingKey, $data, $delay);
+        return $this->dispatch($messageHeaders, $routingKey, $data, $delaySec);
     }
 
     /**
