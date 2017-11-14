@@ -88,8 +88,6 @@ class QueueRepeatManager
      */
     protected function dispatch($messageHeaders, $routingKey, $data, $delay)
     {
-        $deadLetterRoutingKey = isset($messageHeaders['dead-letter-routing-key']) ? $messageHeaders['dead-letter-routing-key'] : $routingKey;
-
         $delayQueue = $this->queueName.'.delay.'.$delay;
         $delayExchange = $this->exchangeName.'.delay';
 
@@ -114,7 +112,7 @@ class QueueRepeatManager
             'x-dead-letter-exchange' => $this->exchangeName, // where messages will be transferred
             'x-expires' => $delay * 1000 + 10000,        // lifetime queue
         ];
-        $messageArguments['x-dead-letter-routing-key'] = $deadLetterRoutingKey;
+        $messageArguments['x-dead-letter-routing-key'] = isset($messageHeaders['dead-letter-routing-key']) ? $messageHeaders['dead-letter-routing-key'] : $routingKey;
 
         /**
          * Declares queue, creates if needed
