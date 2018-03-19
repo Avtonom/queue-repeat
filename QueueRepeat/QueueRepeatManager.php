@@ -44,27 +44,27 @@ class QueueRepeatManager
      * @param array $data
      * @param int $retryMax - 5 then it will be retried if the job processing fails
      * @param int $cap - 1000000 The retryDelay option allows you to progressively delay the job processing on successive retries.
+     * @param int $attempt
      *
      * @return array
      *
      * @throws QueueRepeatException
      */
-    public function resendMessage($messageHeaders, $routingKey, $data, $retryMax = 5, $cap = 1000000)
+    public function resendMessage($messageHeaders, $routingKey, $data, $retryMax = 5, $cap = 1000000, $attempt = 1)
     {
         if($retryMax == 1){
             throw new QueueRepeatException('Attempt resendMessage must be > 1');
         }
-        $attempt = 1;
         if(!empty($messageHeaders['application_headers'])){
             $propertyApplicationHeaders = $messageHeaders['application_headers'];
             if(!empty($propertyApplicationHeaders['x-death'])){
                 $attempt = count($propertyApplicationHeaders['x-death']);
-                if($attempt > $retryMax){
-                    throw new QueueRepeatException(sprintf("The number of max attempts (%s) was exceeded", $retryMax));
-                }
             }
         } else {
             $messageHeaders['application_headers'] = [];
+        }
+        if($attempt > $retryMax){
+            throw new QueueRepeatException(sprintf("The number of max attempts (%s) was exceeded", $retryMax));
         }
         try {
             $delay = $attempt > 1 ? (pow(2, $attempt - 1) * $cap) : $cap;
