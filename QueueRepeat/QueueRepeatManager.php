@@ -149,7 +149,7 @@ class QueueRepeatManager
          */
         $AMQPMessage = new AMQPMessage(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), array('content_type' => 'application/json', 'delivery_mode' => 2));
         if(!empty($messageHeaders['application_headers']['x-death'])){
-            $headers = new AMQPTable($messageHeaders['application_headers']);
+            $headers = new AMQPTable(['application_headers' => ['x-death' => $messageHeaders['application_headers']['x-death']]]);
             $AMQPMessage->set('application_headers', $headers);
         }
 
