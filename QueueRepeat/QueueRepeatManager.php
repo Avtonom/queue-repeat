@@ -58,7 +58,7 @@ class QueueRepeatManager
         if(!empty($messageHeaders['application_headers'])){
             $propertyApplicationHeaders = $messageHeaders['application_headers'];
             if(!empty($propertyApplicationHeaders['x-death'])){
-                $attempt = count($propertyApplicationHeaders['x-death']);
+                $attempt = count($propertyApplicationHeaders['x-death']) + 1;
             }
         } else {
             $messageHeaders['application_headers'] = [];
@@ -149,7 +149,7 @@ class QueueRepeatManager
          */
         $AMQPMessage = new AMQPMessage(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), array('content_type' => 'application/json', 'delivery_mode' => 2));
         if(!empty($messageHeaders['application_headers']['x-death'])){
-            $headers = new AMQPTable(['application_headers' => ['x-death' => $messageHeaders['application_headers']['x-death']]]);
+            $headers = new AMQPTable(['x-death' => $messageHeaders['application_headers']['x-death']]);
             $AMQPMessage->set('application_headers', $headers);
         }
 
