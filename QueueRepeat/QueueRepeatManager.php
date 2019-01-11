@@ -171,4 +171,39 @@ class QueueRepeatManager
             'queue' => $delayQueue,
         ];
     }
+
+    /**
+     * @param AMQPMessage $msg
+     *
+     * @return array
+     */
+    public static function prepareRepeatProperties(AMQPMessage $msg)
+    {
+        $globalEventData = array();
+        if($properties = $msg->get_properties()){
+            foreach ($properties as $propertyKey => $propertyValue) {
+                if(is_object($propertyValue) && $propertyValue instanceof PhpAmqpLib\Wire\AMQPAbstractCollection){
+                    $globalEventData['properties'][$propertyKey] = $propertyValue->getNativeData();
+
+                } elseif(is_object($propertyValue) && $propertyValue instanceof \Iterator) {
+                    $globalEventData['properties'][$propertyKey] = (array)$propertyValue;
+
+                } else {
+                    $globalEventData['properties'][$propertyKey] = $propertyValue;
+                }
+            }
+        }
+        if($msg->has('application_headers') && $applicationHeaders = $msg->get('application_headers')->getNativeData()) {
+            $globalEventData['properties']['application_headers'] = (!empty($globalEventData['properties']['application_headers'])) ? array_merge($globalEventData['properties']['application_headers'], $applicationHeaders) : $applicationHeaders;
+            if(!empty($applicationHeaders['x-death'])){
+                $globalEventData['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
+            }
+
+        } elseif(!empty($globalEventData['properties']['application_headers']) && $applicationHeaders = $globalEventData['properties']['application_headers']){
+            if(!empty($applicationHeaders['x-death'])){
+                $globalEventData['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
+            }
+        }
+        return $globalEventData;
+    }
 }
