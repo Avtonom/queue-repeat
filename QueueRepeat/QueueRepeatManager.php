@@ -179,31 +179,31 @@ class QueueRepeatManager
      */
     public static function prepareRepeatProperties(AMQPMessage $msg)
     {
-        $globalEventData = array();
+        $message = array();
         if($properties = $msg->get_properties()){
             foreach ($properties as $propertyKey => $propertyValue) {
                 if(is_object($propertyValue) && $propertyValue instanceof PhpAmqpLib\Wire\AMQPAbstractCollection){
-                    $globalEventData['properties'][$propertyKey] = $propertyValue->getNativeData();
+                    $message['properties'][$propertyKey] = $propertyValue->getNativeData();
 
                 } elseif(is_object($propertyValue) && $propertyValue instanceof \Iterator) {
-                    $globalEventData['properties'][$propertyKey] = (array)$propertyValue;
+                    $message['properties'][$propertyKey] = (array)$propertyValue;
 
                 } else {
-                    $globalEventData['properties'][$propertyKey] = $propertyValue;
+                    $message['properties'][$propertyKey] = $propertyValue;
                 }
             }
         }
         if($msg->has('application_headers') && $applicationHeaders = $msg->get('application_headers')->getNativeData()) {
-            $globalEventData['properties']['application_headers'] = (!empty($globalEventData['properties']['application_headers'])) ? array_merge($globalEventData['properties']['application_headers'], $applicationHeaders) : $applicationHeaders;
+            $message['properties']['application_headers'] = (!empty($message['properties']['application_headers'])) ? array_merge($message['properties']['application_headers'], $applicationHeaders) : $applicationHeaders;
             if(!empty($applicationHeaders['x-death'])){
-                $globalEventData['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
+                $message['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
             }
 
-        } elseif(!empty($globalEventData['properties']['application_headers']) && $applicationHeaders = $globalEventData['properties']['application_headers']){
+        } elseif(!empty($message['properties']['application_headers']) && $applicationHeaders = $message['properties']['application_headers']){
             if(!empty($applicationHeaders['x-death'])){
-                $globalEventData['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
+                $message['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
             }
         }
-        return $globalEventData;
+        return $message;
     }
 }
