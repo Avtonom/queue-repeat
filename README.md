@@ -12,6 +12,18 @@ install
     $ composer require "avtonom/queue-repeat"
 ```
 
+Use simple:
+```php
+    /** \PhpAmqpLib\Message\AMQPMessage $msg **/
+    $messageHeaders = $msg->get('application_headers')->getNativeData();
+    $repeatManager->init($channel, $queue, $exchange);
+    try {
+        $repeatManager->resendMessage($messageHeaders, $routingKey, $data, $retryMax);
+    } catch (QueueRepeatException $e) { }
+```
+
+Use full code:
+
 config
 ```php
     /** \PhpAmqpLib\Message\AMQPMessage $msg **/
@@ -42,13 +54,14 @@ QueueProvider
 
 use
 
+```php
+    /**
      * @param array $messageHeaders
      * @param string $routingKey
      * @param array $data
-     * @param int $retryMax
-     * @param int $cap
-     
-```php
+     * @param int $retryMax - 5 then it will be retried if the job processing fails
+     * @param int $cap - 1000000 The retryDelay option allows you to progressively delay the job processing on successive retries.
+     */
     $this->getQueueProvider()->setRepeatManager(new QueueRepeatManager());
     try {
         $this->getQueueProvider()->getRepeatManager()->resendMessage($messageHeaders, $routingKey, $data, $retryMax, $cap);
