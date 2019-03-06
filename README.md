@@ -16,9 +16,12 @@ Use simple:
 ```php
     /** \PhpAmqpLib\Message\AMQPMessage $msg **/
     $messageHeaders = $msg->get('application_headers')->getNativeData();
-    $repeatManager->init($channel, $queue, $exchange);
+    $connection = $container->get('@old_sound_rabbit_mq.connection.default');
+    
+    $repeatManager = new QueueRepeat\QueueRepeatManager();
+    $repeatManager->init($connection->channel(), $queue, $exchange);
     try {
-        $repeatManager->resendMessage($messageHeaders, $routingKey, $data, $retryMax);
+        $repeatManager->resendMessage($messageHeaders, $routingKey, $data);
     } catch (QueueRepeatException $e) { }
 ```
 
