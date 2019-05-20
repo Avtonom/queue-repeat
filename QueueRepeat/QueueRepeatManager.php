@@ -210,9 +210,12 @@ class QueueRepeatManager
     /**
      * Reconnects using the original connection settings.
      * This will not recreate any channels that were established previously
+     *
+     * @return $this
      */
     public function reconnect()
     {
         $this->channel->getConnection()->reconnect();
+        return $this;
     }
 }
