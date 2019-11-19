@@ -205,13 +205,16 @@ class QueueRepeatManager
                     $message['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
                 }
             }
-        } elseif($msg instanceof Interop\Amqp\AmqpMessage){
-            $properties = $message->getProperties();
+        } elseif($msg instanceof \Interop\Amqp\AmqpMessage){
+            $properties = $msg->getProperties();
             if(!empty($properties['x-death'])){
                 $message['relays']['attempt'] = count($properties['x-death']) + 1;
+            } elseif(!empty($message['relays']['attempt'])){
+                $message['relays']['attempt'] += 1;
+            } else {
+                $message['relays']['attempt'] = 1;
             }
             $message['properties'] = $properties;
-
         }
         return $message;
     }
