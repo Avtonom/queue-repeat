@@ -173,36 +173,45 @@ class QueueRepeatManager
     }
 
     /**
-     * @param AMQPMessage $msg
+     * @param $msg
      *
      * @return array
      */
-    public static function prepareRepeatProperties(AMQPMessage $msg)
+    public static function prepareRepeatProperties($msg)
     {
         $message = array();
-        if($properties = $msg->get_properties()){
-            foreach ($properties as $propertyKey => $propertyValue) {
-                if(is_object($propertyValue) && $propertyValue instanceof PhpAmqpLib\Wire\AMQPAbstractCollection){
-                    $message['properties'][$propertyKey] = $propertyValue->getNativeData();
+        if($msg instanceof PhpAmqpLib\Message\AMQPMessage){
+            if($properties = $msg->get_properties()){
+                foreach ($properties as $propertyKey => $propertyValue) {
+                    if(is_object($propertyValue) && $propertyValue instanceof PhpAmqpLib\Wire\AMQPAbstractCollection){
+                        $message['properties'][$propertyKey] = $propertyValue->getNativeData();
 
-                } elseif(is_object($propertyValue) && $propertyValue instanceof \Iterator) {
-                    $message['properties'][$propertyKey] = (array)$propertyValue;
+                    } elseif(is_object($propertyValue) && $propertyValue instanceof \Iterator) {
+                        $message['properties'][$propertyKey] = (array)$propertyValue;
 
-                } else {
-                    $message['properties'][$propertyKey] = $propertyValue;
+                    } else {
+                        $message['properties'][$propertyKey] = $propertyValue;
+                    }
                 }
             }
-        }
-        if($msg->has('application_headers') && $applicationHeaders = $msg->get('application_headers')->getNativeData()) {
-            $message['properties']['application_headers'] = (!empty($message['properties']['application_headers'])) ? array_merge($message['properties']['application_headers'], $applicationHeaders) : $applicationHeaders;
-            if(!empty($applicationHeaders['x-death'])){
-                $message['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
-            }
+            if($msg->has('application_headers') && $applicationHeaders = $msg->get('application_headers')->getNativeData()) {
+                $message['properties']['application_headers'] = (!empty($message['properties']['application_headers'])) ? array_merge($message['properties']['application_headers'], $applicationHeaders) : $applicationHeaders;
+                if(!empty($applicationHeaders['x-death'])){
+                    $message['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
+                }
 
-        } elseif(!empty($message['properties']['application_headers']) && $applicationHeaders = $message['properties']['application_headers']){
-            if(!empty($applicationHeaders['x-death'])){
-                $message['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
+            } elseif(!empty($message['properties']['application_headers']) && $applicationHeaders = $message['properties']['application_headers']){
+                if(!empty($applicationHeaders['x-death'])){
+                    $message['relays']['attempt'] = count($applicationHeaders['x-death']) + 1;
+                }
             }
+        } elseif($msg instanceof Interop\Amqp\AmqpMessage){
+            $properties = $message->getProperties();
+            if(!empty($properties['x-death'])){
+                $message['relays']['attempt'] = count($properties['x-death']) + 1;
+            }
+            $message['properties'] = $properties;
+
         }
         return $message;
     }
