@@ -174,12 +174,13 @@ class QueueRepeatManager
 
     /**
      * @param $msg
+     * @param null $message
      *
-     * @return array
+     * @return array|null
      */
-    public static function prepareRepeatProperties($msg)
+    public static function prepareRepeatProperties($msg, $message = null)
     {
-        $message = array();
+        $message = ($message) ? $message : array();
         if($msg instanceof PhpAmqpLib\Message\AMQPMessage){
             if($properties = $msg->get_properties()){
                 foreach ($properties as $propertyKey => $propertyValue) {
