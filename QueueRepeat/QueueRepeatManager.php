@@ -6,8 +6,8 @@ use PhpAmqpLib\Channel\AMQPChannel,
     PhpAmqpLib\Wire\AMQPTable,
     PhpAmqpLib\Message\AMQPMessage;
 use QueueRepeat\Exception\QueueRepeatException;
-use Yriveiro\Backoff\Backoff,
-    Yriveiro\Backoff\BackoffException;
+//use Yriveiro\Backoff\Backoff,
+//    Yriveiro\Backoff\BackoffException;
 
 class QueueRepeatManager
 {
@@ -66,15 +66,15 @@ class QueueRepeatManager
         if($attempt > $retryMax){
             throw new QueueRepeatException(sprintf("The number of max attempts (%s) was exceeded", $retryMax));
         }
-        try {
+//        try {
             $delay = $attempt > 1 ? (pow(2, $attempt - 1) * $cap) : $cap;
             $delaySec = (int) floor($delay / 1000000);
 //            $backoff = new Backoff(['maxAttempts' => $retryMax, 'cap' => $cap]);
 //            $delay = $backoff->equalJitter($attempt);
 //            $delay = (int) floor($backoff->equalJitter($attempt) / 1000);
-        } catch (BackoffException $e) {
-            throw new QueueRepeatException($e->getMessage(), $e->getCode(), $e);
-        }
+//        } catch (BackoffException $e) {
+//            throw new QueueRepeatException($e->getMessage(), $e->getCode(), $e);
+//        }
         return $this->dispatch($messageHeaders, $routingKey, $data, $delaySec);
     }
 
